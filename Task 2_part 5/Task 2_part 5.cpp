@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <windows.h>
 #include <conio.h>
 
@@ -17,26 +17,26 @@ int main() {
 
         mov i, 1
 
-        loop_start:
+    loop_start:
         fild i          // ST(0) = i
-            fld1
-            fdiv            // ST(0) = 1 / i
-            fadd            // сумма += 1 / i
+        fld1
+        fdiv            // ST(0) = 1 / i
+        fadd            // сумма += 1 / i
 
-            fld st(0)       // Копируем сумму в ST(0)
-            fld a           // ST(0) = a, ST(1) = сумма
-            fcomip st(0), st(1) // Сравнение: a ? сумма
-            fstp st(0)      // Убираем a
+        fld st(0)       // Копируем сумму в ST(0)
+        fld a           // ST(0) = a, ST(1) = сумма
+        fcomip st(0), st(1) // Сравниваем: a ? сумма
+        fstp st(0)      // Убираем a
 
-            jb found
+        jb found        // Если сумма > a → выход
 
-            inc i
-            jmp loop_start
+        inc i
+        jmp loop_start
 
-            found :
+    found:
         mov eax, i
-            mov result, eax
-            fstp st(0)      // Очистка стека
+        mov result, eax
+        fstp st(0)      // Очистка оставшейся суммы
     }
 
     std::cout << "Сумма меньше " << a << " достигается при i = " << result << "\n";
