@@ -12,8 +12,7 @@ int main() {
 
     __asm {
         finit           // Инициализация FPU
-        fldz            // ST(0) = 0.0 — начальная сумма
-
+        fldz           // ST(0) = 0.0 — начальная сумма
         mov k, 1
 
     loop_start:
@@ -21,34 +20,33 @@ int main() {
         jge end_loop
 
         // Вычисляем x^(2k)
-        fld x              // ST(0) = x
-        fmul st(0), st(0)  // ST(0) = x^2
-
+        fld x          // ST(0) = x
+        fmul st(0), st(0) // ST(0) = x^2
         mov ecx, 1
 
     power_loop:
-        inc ecx
         cmp ecx, k
-        jg end_power
-        fmul st(0), st(0)  // ST(0) = x^(2*ecx)
+        jge end_power
+        fmul st(0), st(0) // Умножаем на x^2 (неверно! Исправьте!)
+        inc ecx
         jmp power_loop
 
     end_power:
         // Делим на 2k
         mov eax, k
-        shl eax, 1           // eax = 2k
+        add eax, eax    // eax = 2k
         push eax
-        fild dword ptr [esp] // ST(0) = 2k (int -> float)
+        fild dword ptr [esp] // ST(0) = 2k
         add esp, 4
-        fdiv                // ST(0) = x^(2k) / 2k
+        fdiv           // ST(0) = x^(2k) / 2k
 
-        fadd                // sum += ...
+        fadd           // sum += x^(2k) / 2k
 
         inc k
         jmp loop_start
 
     end_loop:
-        fstp sum            // sum = ST(0)
+        fstp sum       // Сохраняем сумму
     }
 
     std::cout << "Сумма ряда при x = -1.1: " << sum << "\n";
