@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <windows.h>
 #include <conio.h>
 
@@ -17,34 +17,28 @@ int main() {
 
         mov i, 1
 
-        month_loop:
+    month_loop:
         cmp i, 13
-            jge end_loop
+        jge end_loop
 
-            // Добавляем X к сумме
-            fld X              // ST(0) = X
-            fadd               // ST(0) = ST(0) + ST(1), то есть сумма + X
+        fld X              // ST(0) = X
+        fadd               // ST(0) = ST(0) + ST(1)
 
-            // Сохраняем результат обратно на вершине стека (новая сумма)
-            // ничего делать не нужно — она уже в ST(0)
+        mov eax, i
+        xor edx, edx
+        mov ecx, 3
+        div ecx
+        cmp edx, 0
+        jne skip_percent
 
-            // Проверяем, конец ли квартала (каждые 3 месяца)
-            mov eax, i
-            mov edx, 0
-            mov ecx, 3
-            div ecx
-            cmp edx, 0
-            jne skip_percent
+        fld percent        // ST(0) = 1.03
+        fmul               // ST(0) = сумма * 1.03
 
-            // Умножаем на 1.03
-            fld percent        // ST(0) = 1.03, ST(1) = сумма
-            fmul               // ST(0) = ST(0) * ST(1) = сумма * 1.03
-
-            skip_percent :
+    skip_percent:
         inc i
-            jmp month_loop
+        jmp month_loop
 
-            end_loop :
+    end_loop:
         fstp S             // Сохраняем результат в переменную S
     }
 
