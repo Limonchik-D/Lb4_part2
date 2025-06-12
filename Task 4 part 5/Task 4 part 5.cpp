@@ -1,64 +1,61 @@
-﻿#include <iostream>
+#include <iostream>
 #include <cmath>
 #include <windows.h>
 
 using namespace std;
 
 double computeExpression(int n) {
-    double sum_sin = 0.0;      // сумма sin(1) + sin(2) + ... + sin(n)
-    double term1 = 0.0;        // 1/sin(1)
-    double term2 = 0.0;        // 1/(sin(1) + sin(2))
-    double term3 = 0.0;        // (-1)^(2*n+1) / sum_sin  (но (-1)^(2*n+1) всегда = -1)
+    double sum_sin = 0.0;
+    double term1 = 0.0;
+    double term2 = 0.0;
+    double term3 = 0.0;
     double one = 1.0;
     double neg_one = -1.0;
 
-    // Вычисляем сумму синусов от 1 до n с помощью C++ (без ассемблера)
+    // Считаем сумму sin(i)
     for (int i = 1; i <= n; i++) {
         sum_sin += sin(i);
     }
 
-    // Для term1 и term2 нам нужны sin(1) и sin(1) + sin(2).
-    // Если n меньше 2, то term2 вычислить невозможно; поэтому требуем n>=2.
+    // sin(1) и sin(1)+sin(2)
     double s1 = sin(1.0);
     double s12 = sin(1.0) + sin(2.0);
 
     __asm {
-        finit                        // инициализация FPU
+        finit
 
-        // term1 = 1/sin(1)
-        fld     one                // st(0)= 1.0
-        fld     s1                 // st(0)= s1, st(1)= 1.0
-        fdivp   st(1), st          // st(0)= 1.0/s1
-        fstp    term1              // term1 <- 1/s1
+        // term1 = 1 / sin(1)
+        fld     one
+        fld     s1
+        fdivp   st(1), st
+        fstp    term1
 
-        // term2 = 1/(sin(1)+sin(2))
-        fld     one                // st(0)= 1.0
-        fld     s12                // st(0)= s12, st(1) = 1.0
-        fdivp   st(1), st          // st(0)= 1.0/s12
-        fstp    term2              // term2 <- 1/s12
+        // term2 = 1 / (sin(1) + sin(2))
+        fld     one
+        fld     s12
+        fdivp   st(1), st
+        fstp    term2
 
-        // term3 = (-1)^(2*n+1) / sum_sin.
-        // Заметим, что (-1)^(2*n+1) = -1 при любом n.
-        fld     neg_one            // st(0)= -1.0
-        fld     sum_sin            // st(0)= sum_sin, st(1)= -1.0
-        fdivp   st(1), st          // st(0)= (-1.0) / sum_sin
-        fstp    term3              // term3 <- (-1)/ sum_sin
+        // term3 = -1 / sum_sin
+        fld     neg_one
+        fld     sum_sin
+        fdivp   st(1), st
+        fstp    term3
     }
 
-    double result;
+    double result = 0.0;
     __asm {
         finit
-        fld     term1              // st0 = term1
-        fadd    term2              // st0 = term1 + term2
-        fsub    term3              // st0 = term1 + term2 - term3
-        fstp    result             // result <- (term1 + term2 - term3)
+        fld     term1
+        fadd    term2
+        fsub    term3
+        fstp    result
     }
 
     return result;
 }
 
 int main() {
-    // Установка кодовой страницы для корректного отображения русского текста в консоли
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
 
